@@ -56,7 +56,10 @@ export function getMaxRefreshCount(
 ): number {
   // Check provider-specific override first
   if (provider && config?.providers?.[provider]?.maxRefreshCount) {
-    return config.providers[provider].maxRefreshCount!;
+    const count = config.providers[provider].maxRefreshCount;
+    if (count !== undefined) {
+      return count;
+    }
   }
 
   // Fall back to global config or default
@@ -73,12 +76,13 @@ export function getRefreshIntervalMs(
 ): number | null {
   // Check provider-specific override first
   if (provider && config?.providers?.[provider]?.refreshInterval) {
-    try {
-      return parseDurationMs(config.providers[provider].refreshInterval!, {
-        defaultUnit: "m",
-      });
-    } catch {
-      // Invalid duration, fall through
+    const interval = config.providers[provider].refreshInterval;
+    if (interval) {
+      try {
+        return parseDurationMs(interval, { defaultUnit: "m" });
+      } catch {
+        // Invalid duration, fall through
+      }
     }
   }
 

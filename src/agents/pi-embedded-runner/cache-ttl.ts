@@ -95,7 +95,6 @@ export function appendCacheTtlTimestamp(sessionManager: unknown, data: CacheTtlE
  */
 export function getProviderCacheTtlMs(provider: string, modelId: string): number | null {
   const normalizedProvider = provider.toLowerCase();
-  const normalizedModelId = modelId.toLowerCase();
 
   // Check if provider is eligible for caching
   if (!isCacheTtlEligibleProvider(provider, modelId)) {

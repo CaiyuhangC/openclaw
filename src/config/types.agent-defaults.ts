@@ -3,6 +3,7 @@ import type { AgentModelConfig, AgentSandboxConfig } from "./types.agents-shared
 import type {
   BlockStreamingChunkConfig,
   BlockStreamingCoalesceConfig,
+  CacheAutoRefreshConfig,
   HumanDelayConfig,
   TypingMode,
 } from "./types.base.js";
@@ -268,6 +269,8 @@ export type AgentDefaultsConfig = {
      */
     includeReasoning?: boolean;
   };
+  /** Automatic cache refresh before TTL expiry to reduce LLM costs. */
+  cacheAutoRefresh?: CacheAutoRefreshConfig;
   /** Max concurrent agent runs across all conversations. Default: 1 (sequential). */
   maxConcurrent?: number;
   /** Sub-agent defaults (spawned via sessions_spawn). */
