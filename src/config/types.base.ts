@@ -193,6 +193,27 @@ export type DiagnosticsOtelConfig = {
   flushIntervalMs?: number;
 };
 
+export type CacheAutoRefreshProviderConfig = {
+  /** Maximum refresh count for this provider (overrides global default). */
+  maxRefreshCount?: number;
+  /** Custom refresh interval for this provider (e.g., "4m30s"). */
+  refreshInterval?: string;
+};
+
+export type CacheAutoRefreshConfig = {
+  /** Enable automatic cache refresh before expiry. Default: false. */
+  enabled?: boolean;
+  /** Maximum number of cache refreshes per session. Default: 10. */
+  maxRefreshCount?: number;
+  /**
+   * Custom refresh interval (e.g., "4m", "4m30s").
+   * If not set, uses provider's default TTL minus a safety margin.
+   */
+  refreshInterval?: string;
+  /** Per-provider override configurations. */
+  providers?: Record<string, CacheAutoRefreshProviderConfig>;
+};
+
 export type DiagnosticsCacheTraceConfig = {
   enabled?: boolean;
   filePath?: string;
