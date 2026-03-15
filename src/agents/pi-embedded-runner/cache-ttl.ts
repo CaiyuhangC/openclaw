@@ -16,6 +16,20 @@ const OPENROUTER_CACHE_TTL_MODEL_PREFIXES = [
   "zai/",
 ] as const;
 
+/**
+ * Default cache TTL values for providers that support prompt caching (in milliseconds).
+ * Anthropic: 5 minutes (300,000ms)
+ * Moonshot: 5 minutes (300,000ms)
+ * ZAI: 5 minutes (300,000ms)
+ */
+const PROVIDER_DEFAULT_CACHE_TTL_MS: Record<string, number> = {
+  anthropic: 5 * 60 * 1000, // 5 minutes
+  moonshot: 5 * 60 * 1000, // 5 minutes
+  zai: 5 * 60 * 1000, // 5 minutes
+  openrouter: 5 * 60 * 1000, // 5 minutes (for eligible models)
+  kilocode: 5 * 60 * 1000, // 5 minutes (for anthropic/* models)
+};
+
 function isOpenRouterCacheTtlModel(modelId: string): boolean {
   return OPENROUTER_CACHE_TTL_MODEL_PREFIXES.some((prefix) => modelId.startsWith(prefix));
 }
@@ -73,4 +87,20 @@ export function appendCacheTtlTimestamp(sessionManager: unknown, data: CacheTtlE
   } catch {
     // ignore persistence failures
   }
+}
+
+/**
+ * Get the default cache TTL for a provider in milliseconds.
+ * Returns null if the provider doesn't support caching or is not recognized.
+ */
+export function getProviderCacheTtlMs(provider: string, modelId: string): number | null {
+  const normalizedProvider = provider.toLowerCase();
+
+  // Check if provider is eligible for caching
+  if (!isCacheTtlEligibleProvider(provider, modelId)) {
+    return null;
+  }
+
+  // Return the provider's default TTL
+  return PROVIDER_DEFAULT_CACHE_TTL_MS[normalizedProvider] ?? null;
 }

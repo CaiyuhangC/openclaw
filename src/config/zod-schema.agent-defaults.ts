@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDurationMs } from "../cli/parse-duration.js";
 import { isValidNonNegativeByteSizeString } from "./byte-size.js";
 import {
   HeartbeatSchema,
@@ -13,6 +14,51 @@ import {
   HumanDelaySchema,
   TypingModeSchema,
 } from "./zod-schema.core.js";
+
+const CacheAutoRefreshProviderSchema = z
+  .object({
+    maxRefreshCount: z.number().int().positive().optional(),
+    refreshInterval: z.string().optional(),
+  })
+  .strict()
+  .superRefine((val, ctx) => {
+    if (!val.refreshInterval) {
+      return;
+    }
+    try {
+      parseDurationMs(val.refreshInterval, { defaultUnit: "m" });
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["refreshInterval"],
+        message: "invalid duration (use ms, s, m, h)",
+      });
+    }
+  });
+
+const CacheAutoRefreshSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    maxRefreshCount: z.number().int().positive().optional(),
+    refreshInterval: z.string().optional(),
+    providers: z.record(z.string(), CacheAutoRefreshProviderSchema).optional(),
+  })
+  .strict()
+  .superRefine((val, ctx) => {
+    if (!val.refreshInterval) {
+      return;
+    }
+    try {
+      parseDurationMs(val.refreshInterval, { defaultUnit: "m" });
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["refreshInterval"],
+        message: "invalid duration (use ms, s, m, h)",
+      });
+    }
+  })
+  .optional();
 
 export const AgentDefaultsSchema = z
   .object({
@@ -161,6 +207,7 @@ export const AgentDefaultsSchema = z
     typingIntervalSeconds: z.number().int().positive().optional(),
     typingMode: TypingModeSchema.optional(),
     heartbeat: HeartbeatSchema,
+    cacheAutoRefresh: CacheAutoRefreshSchema,
     maxConcurrent: z.number().int().positive().optional(),
     subagents: z
       .object({
